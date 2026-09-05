@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
+body {
+  background: #06080c;
+  color: #e8eef4;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  background-image:
+    radial-gradient(900px 400px at 15% -5%, rgba(139,123,255,.12), transparent 60%),
+    radial-gradient(700px 380px at 90% 0%, rgba(255,178,36,.09), transparent 60%),
+    radial-gradient(1200px 800px at 50% 120%, rgba(61,240,138,.05), transparent 60%);
+  background-attachment: fixed;
+}
+::selection { background: #ffb224; color: #000; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0c1118; }
+::-webkit-scrollbar-thumb { background: #1c2635; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3a52; }
+
+.card {
+  background: linear-gradient(180deg, #0d1320 0%, #0c1118 100%);
+  border: 1px solid #1c2635;
+  border-radius: 14px;
+}
+.input {
+  background: #0a0f16;
+  border: 1px solid #1c2635;
+  border-radius: 10px;
+  color: #e8eef4;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+}
+.input:focus { border-color: #ffb224; box-shadow: 0 0 0 2px rgba(255,178,36,.15); }
+.btn-primary {
+  background: #ffb224; color: #0a0a0a; font-weight: 600;
+  border-radius: 10px; padding: 0.55rem 1rem; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  transition: transform .08s ease, filter .15s ease;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-primary:active { transform: scale(.97); }
+.btn-ghost {
+  border: 1px solid #1c2635; color: #8b98a9; border-radius: 10px;
+  padding: 0.55rem 0.9rem; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  transition: all .15s ease;
+}
+.btn-ghost:hover { color: #e8eef4; border-color: #2a3a52; background: #101722; }
+.stream-caret::after {
+  content: "▍"; color: #3df08a; animation: blink 0.8s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.prose-chat p { margin: 0 0 0.4rem; }
+.prose-chat p:last-child { margin-bottom: 0; }
