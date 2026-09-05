@@ -113,7 +113,10 @@ export default function Recipes({ query }: { query: string }) {
       </Card>
 
       {list.length === 0 ? (
-        <Empty title="No recipes here." hint="Chain actions above — reports run against live app state and log to Activity." />
+        <Empty
+          title={recipes.length ? `No recipes match “${query.trim()}”.` : 'No recipes yet.'}
+          hint={recipes.length ? 'Try a different search or clear the search box.' : 'Build one above — reports run against live state and log to Activity.'}
+        />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {list.map((r) => (

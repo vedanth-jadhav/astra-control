@@ -42,12 +42,15 @@ export default function Activity({ query }: { query: string }) {
       </Card>
 
       {list.length === 0 ? (
-        <Empty title="Nothing logged here." hint="Chat, tests, recipe runs and edits all land in this log." />
+        <Empty
+          title={activity.length ? 'No activity matches this filter.' : 'No activity yet.'}
+          hint={activity.length ? 'Pick a different kind or clear the search box.' : 'Send a chat message or test a connection to start the log.'}
+        />
       ) : (
         <ol className="space-y-2">
           {list.map((a) => (
             <li key={a.id} className="card flex items-start gap-3 p-3">
-              <Badge tone={a.kind === 'recipe' ? 'info' : a.kind === 'connection' ? 'ok' : a.kind === 'subscription' ? 'warn' : 'dim'}>{a.kind}</Badge>
+              <span className="flex-none"><Badge tone={a.kind === 'recipe' ? 'info' : a.kind === 'connection' ? 'ok' : a.kind === 'subscription' ? 'warn' : 'dim'}>{a.kind}</Badge></span>
               <div className="min-w-0 flex-1">
                 <p className="break-words text-sm text-ink">{a.text}</p>
                 <p className="mt-0.5 font-mono text-[11px] text-faint">{fmtDate(a.ts)}</p>

@@ -73,7 +73,7 @@ export default function CommandPalette() {
               aria-label="Command input"
             />
             <ul className="max-h-72 overflow-y-auto p-1.5" role="listbox" aria-label="Commands">
-              {items.length === 0 && <li className="px-3 py-4 text-center text-sm text-dim">No matching commands.</li>}
+              {items.length === 0 && <li className="px-3 py-4 text-center text-sm text-dim">No matching commands. Try a different search.</li>}
               {items.map((it, i) => {
                 const Icon = it.icon;
                 return (

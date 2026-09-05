@@ -94,7 +94,10 @@ export default function Subscriptions({ query }: { query: string }) {
       </Card>
 
       {list.length === 0 ? (
-        <Empty title="No subscriptions here." hint="Add one above — totals and renewal alerts update live." />
+        <Empty
+          title={subscriptions.length ? `No subscriptions match “${query.trim()}”.` : 'No subscriptions yet.'}
+          hint={subscriptions.length ? 'Try a different search or clear the search box.' : 'Add one above — totals and renewal alerts update as you type.'}
+        />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {list.map((s) => {

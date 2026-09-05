@@ -93,7 +93,10 @@ export default function Connections({ query }: { query: string }) {
       </Card>
 
       {list.length === 0 ? (
-        <Empty title={connections.length ? `No connections match "${query}".` : 'No connections yet.'} hint="Add your first endpoint above — it gets a real live status check." />
+        <Empty
+          title={connections.length ? `No connections match “${query.trim()}”.` : 'No connections yet.'}
+          hint={connections.length ? 'Try a different search or clear the search box.' : 'Add your first endpoint above to run a live status check.'}
+        />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {list.map((c) => (
