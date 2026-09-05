@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { StoreProvider, useStore } from './lib/store';
 import Sidebar from './components/Sidebar';
+import StatsStrip from './components/StatsStrip';
 import Chat from './components/Chat';
 import Connections from './components/Connections';
 import Subscriptions from './components/Subscriptions';
@@ -56,7 +57,12 @@ function Shell() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.16 }}
           >
-            {tab === 'chat' && <Chat />}
+            {tab === 'chat' && (
+              <>
+                <StatsStrip />
+                <Chat />
+              </>
+            )}
             {tab === 'connections' && <Connections query={globalQuery} />}
             {tab === 'subscriptions' && <Subscriptions query={globalQuery} />}
             {tab === 'recipes' && <Recipes query={globalQuery} />}
@@ -64,7 +70,7 @@ function Shell() {
           </motion.div>
         </AnimatePresence>
         <footer className="mt-4 font-mono text-[11px] text-faint">
-          astra-control v2 · static build · state in localStorage · keys obfuscated, never leave your browser
+          astra-control v3 · static build · state in localStorage · keys obfuscated, never leave your browser
         </footer>
       </main>
       <CommandPalette />

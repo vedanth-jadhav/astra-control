@@ -9,7 +9,7 @@ function renderText(t: string): string[] {
 }
 
 export default function Chat() {
-  const { messages, pushMessage, updateMessage, clearChat, connections, subscriptions, recipes, log, setTab } = useStore();
+  const { messages, pushMessage, updateMessage, clearChat, connections, subscriptions, recipes, log, setTab, activity } = useStore();
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -88,27 +88,29 @@ export default function Chat() {
 
   return (
     <div className="card flex h-[70vh] min-h-[480px] flex-col overflow-hidden lg:h-[calc(100vh-3rem)]">
-      <div className="flex items-center justify-between border-b border-line px-4 py-3">
-        <div>
-          <h2 className="font-mono text-sm font-bold tracking-widest text-ink">ASTRA CHAT</h2>
-          <p className="font-mono text-[11px] text-dim">local brain · streams · persists · /api/chat ready</p>
+      <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
+        <div className="flex items-center gap-2.5">
+          <span className="h-2 w-2 rounded-full bg-signal shadow-[0_0_8px_#3df08a]" aria-hidden />
+          <div>
+            <h2 className="font-mono text-sm font-bold tracking-widest text-ink">ASTRA CHAT</h2>
+            <p className="font-mono text-[11px] text-dim">local brain · streams · persists · /api/chat ready</p>
+          </div>
         </div>
         <div className="flex gap-2">
-          <button className="btn-ghost !px-2.5" onClick={exportTranscript} title="Export transcript (.md)"><Download size={15} /></button>
-          <button className="btn-ghost !px-2.5" onClick={() => { clearChat(); log('chat', 'Chat cleared.'); }} title="Clear history"><Trash2 size={15} /></button>
+          <button className="btn-ghost !px-2.5 !py-1.5" onClick={exportTranscript} title="Export transcript (.md)"><Download size={15} /></button>
+          <button className="btn-ghost !px-2.5 !py-1.5" onClick={() => { clearChat(); log('chat', 'Chat cleared.'); }} title="Clear history"><Trash2 size={15} /></button>
         </div>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4" role="log" aria-label="Chat history" aria-live="polite">
         {messages.length === 0 && (
-          <div className="rounded-xl border border-dashed border-line p-5">
-            <p className="text-sm text-ink">No messages yet. Try one:</p>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <div className="rounded-xl border border-line bg-panel2/60 px-4 py-3.5">
+            <p className="text-sm text-ink"><span className="font-mono text-[11px] uppercase tracking-widest text-signal">astra</span> · standing by. Ask me anything:</p>
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
               {['what renews soon?', 'total spend?', 'are my connections up?', '/help'].map((s) => (
-                <button key={s} onClick={() => send(s)} className="btn-ghost !py-1.5 font-mono text-xs">{s}</button>
+                <button key={s} onClick={() => send(s)} className="btn-ghost !px-2.5 !py-1 font-mono text-xs">{s}</button>
               ))}
             </div>
-            <p className="mt-3 font-mono text-[11px] text-faint">{COMMANDS.map((c) => c.cmd).join('  ·  ')}</p>
           </div>
         )}
         {messages.map((m) => (

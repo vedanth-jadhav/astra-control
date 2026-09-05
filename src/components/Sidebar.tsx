@@ -20,6 +20,20 @@ export default function Sidebar() {
     recipes: recipes.filter((r) => r.enabled).length,
     activity: 0,
   };
+  // Connection health dot: green = all online, red = any offline, amber = degraded/checking, gray = none
+  const connDot = connections.length === 0 ? 'bg-faint'
+    : connections.some((c) => c.status === 'offline') ? 'bg-rose shadow-[0_0_8px_#fb7185]'
+    : connections.some((c) => c.status === 'degraded' || c.status === 'checking') ? 'bg-amber shadow-[0_0_8px_#ffb224]'
+    : connections.some((c) => c.status === 'online') ? 'bg-signal shadow-[0_0_8px_#3df08a]'
+    : 'bg-faint';
+  const connsUp = connections.filter((c) => c.status === 'online').length;
+  // Subscription urgency: renewals due within 7 days (or overdue)
+  const soonCount = subscriptions.filter((s) => {
+    if (!s.active) return false;
+    const [y, m, d] = s.renewal.split('-').map(Number);
+    const days = Math.round((new Date(y, m - 1, d).getTime() - new Date(new Date().toDateString()).getTime()) / 86400000);
+    return days <= 7;
+  }).length;
   return (
     <aside className="flex w-full flex-col gap-4 lg:w-64 lg:flex-none">
       <div className="card flex items-center gap-3 p-4">
@@ -64,7 +78,21 @@ export default function Sidebar() {
             >
               <Icon size={17} />
               <span className="hidden lg:inline">{t.label}</span>
-              {counts[t.id] > 0 && (
+              {t.id === 'connections' && connections.length > 0 && (
+                <span className={`ml-auto hidden items-center gap-1.5 lg:inline-flex`} title={`${connsUp}/${connections.length} online`}>
+                  <span className={`h-2 w-2 rounded-full ${connDot}`} />
+                  <span className="font-mono text-[11px] text-dim">{connsUp}/{connections.length}</span>
+                </span>
+              )}
+              {t.id === 'subscriptions' && soonCount > 0 && (
+                <span className="ml-auto hidden items-center gap-1.5 lg:inline-flex">
+                  <span className="rounded-full bg-panel2 px-2 py-0.5 font-mono text-[11px] text-dim">{counts[t.id]}</span>
+                  <span className="rounded-full border border-rose/40 bg-rose/10 px-2 py-0.5 font-mono text-[11px] text-rose" title={`${soonCount} renewal${soonCount === 1 ? '' : 's'} due within 7 days`}>
+                    {soonCount} soon
+                  </span>
+                </span>
+              )}
+              {t.id !== 'connections' && !(t.id === 'subscriptions' && soonCount > 0) && counts[t.id] > 0 && (
                 <span className="ml-auto hidden rounded-full bg-panel2 px-2 py-0.5 font-mono text-[11px] text-dim lg:inline">{counts[t.id]}</span>
               )}
             </button>
