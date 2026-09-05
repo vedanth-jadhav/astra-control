@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astra Control — Mission Deck</title>
+<style>
+:root{
+  --void:#06080c; --panel:#0c1118; --panel2:#101722; --line:#1c2635;
+  --ink:#e8eef4; --dim:#8b98a9; --faint:#4a5668;
+  --amber:#ffb224; --signal:#3df08a; --violet:#8b7bff; --rose:#ff6b7a;
+  --mono:"SFMono-Regular",ui-monospace,"Cascadia Code","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--void);color:var(--ink);font-family:var(--sans);min-height:100vh;
+  background-image:radial-gradient(900px 400px at 15% -5%,rgba(139,123,255,.12),transparent 60%),
+  radial-gradient(700px 380px at 90% 0%,rgba(255,178,36,.09),transparent 60%),
+  radial-gradient(1200px 800px at 50% 120%,rgba(61,240,138,.05),transparent 60%);}
+::selection{background:var(--amber);color:#000}
+a{color:var(--amber)}
+/* header */
+header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:rgba(6,8,12,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+.orbit{width:40px;height:40px;flex:none;position:relative}
+.orbit .core{position:absolute;inset:14px;border-radius:50%;background:var(--signal);box-shadow:0 0 14px var(--signal)}
+.orbit .ring{position:absolute;inset:2px;border:1px solid var(--line);border-radius:50%}
+.orbit .sat{position:absolute;inset:2px;animation:spin 6s linear infinite}
+.orbit .sat::after{content:"";position:absolute;top:-3px;left:50%;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.orbit .sat{animation:none}}
+.brand h1{font-size:19px;letter-spacing:.02em;font-weight:800}
+.brand h1 span{color:var(--amber)}
+.brand p{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px}
+.status-pill{margin-left:auto;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;
+  border:1px solid var(--line);background:var(--panel);padding:8px 12px;border-radius:999px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--signal);box-shadow:0 0 10px var(--signal);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.status-pill button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:3px 10px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.status-pill button:hover{color:var(--ink);border-color:var(--faint)}
+#clock{font-family:var(--mono);font-size:12px;color:var(--dim)}
+/* ticker */
+.ticker{border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--dim);padding:8px 0;background:#080c12}
+.ticker span{display:inline-block;padding-left:100%;animation:tick 30s linear infinite}
+.ticker b{color:var(--signal);font-weight:600}
+@keyframes tick{to{transform:translateX(-100%)}}
+@media(prefers-reduced-motion:reduce){.ticker span{animation:none;padding-left:20px}}
+/* layout */
+main{max-width:1280px;margin:0 auto;padding:20px;display:grid;gap:18px;
+  grid-template-columns:1.15fr .85fr;grid-template-areas:"chat side" "conn side" "subs recipes" "log log";}
+#panel-chat{grid-area:chat}#col-side{grid-area:side;display:flex;flex-direction:column;gap:18px}
+#panel-conn{grid-area:conn}#panel-subs{grid-area:subs}#panel-recipes{grid-area:recipes}#panel-log{grid-area:log}
+@media(max-width:940px){main{grid-template-columns:1fr;grid-template-areas:"chat" "side" "conn" "subs" "recipes" "log"}}
+section.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:13px;font-family:var(--mono);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.card-h h2 i{font-style:normal;color:var(--amber);margin-right:8px}
+.card-h .right{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.card-b{padding:16px}
+/* chat */
+#msgs{height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;margin-bottom:12px}
+.msg{max-width:85%;padding:10px 13px;border-radius:12px;font-size:14px;line-height:1.5}
+.msg.user{align-self:flex-end;background:var(--amber);color:#14100a;border-bottom-right-radius:3px;font-weight:500}
+.msg.astra{align-self:flex-start;background:#141d2b;border:1px solid var(--line);border-bottom-left-radius:3px}
+.msg.astra::before{content:"✦ ";color:var(--signal)}
+.msg .t{display:block;font-family:var(--mono);font-size:10px;opacity:.55;margin-top:6px}
+.msg.typing{color:var(--dim);font-family:var(--mono);font-size:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chips button{background:#141d2b;border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer}
+.chips button:hover{color:var(--amber);border-color:var(--amber)}
+.chat-row{display:flex;gap:8px}
+.chat-row input{flex:1;background:#080d14;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:12px;font-size:14px;outline:none}
+.chat-row input:focus{border-color:var(--amber)}
+.chat-row button{background:var(--signal);border:none;border-radius:10px;padding:0 20px;font-weight:800;cursor:pointer;color:#04120a}
+.chat-row button:hover{filter:brightness(1.1)}
+.hint{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:8px}
+/* connections */
+.conn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.conn{border:1px solid var(--line);border-radius:11px;padding:12px;background:#0a0f16;position:relative}
+.conn.on{border-color:rgba(61,240,138,.5)}
+.conn .ic{font-size:20px}
+.conn h3{font-size:13.5px;margin:6px 0 2px}
+.conn p{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.conn button{margin-top:9px;width:100%;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--dim)}
+.conn.on button{background:rgba(61,240,138,.12);border-color:var(--signal);color:var(--signal)}
+.conn:not(.on) button:hover{border-color:var(--amber);color:var(--amber)}
+.mini-form{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.mini-form input,.mini-form select{background:#080d14;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 10px;font-size:13px;flex:1;min-width:120px;outline:none}
+.mini-form button{background:var(--amber);border:none;border-radius:8px;padding:9px 16px;font-weight:800;cursor:pointer}
+.del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--faint);cursor:pointer;font-size:14px}
+.del:hover{color:var(--rose)}
+/* subs */
+.sub-total{display:flex;align-items:baseline;gap:10px;background:#080d14;border:1px dashed #2a3a52;border-radius:11px;padding:12px 14px;margin-bottom:12px}
+.sub-total strong{font-size:28px;color:var(--amber);font-variant-numeric:tabular-nums}
+.sub-total span{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.sub-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--line);font-size:13.5px}
+.sub-row .n{font-weight:700}
+.sub-row .r{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.sub-row .c{margin-left:auto;font-family:var(--mono);font-weight:700;color:var(--signal);white-space:nowrap}
+.sub-row .x{background:none;border:none;color:var(--faint);cursor:pointer;font-size:15px}
+.sub-row .x:hover{color:var(--rose)}
+/* recipes */
+.recipe{border:1px solid var(--line);border-radius:11px;padding:12px 13px;margin-bottom:10px;background:#0a0f16;display:flex;gap:12px;align-items:flex-start}
+.recipe.off{opacity:.55}
+.recipe .txt{flex:1;font-size:13.5px;line-height:1.55}
+.recipe .txt::before{content:"“";color:var(--violet);font-size:18px}
+.recipe .meta{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:6px}
+.switch{flex:none;width:44px;height:24px;border-radius:999px;border:1px solid var(--line);background:#080d14;cursor:pointer;position:relative}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--faint);transition:.2s}
+.switch[aria-checked="true"]{background:rgba(139,123,255,.2);border-color:var(--violet)}
+.switch[aria-checked="true"]::after{left:22px;background:var(--violet);box-shadow:0 0 10px var(--violet)}
+/* memory + log */
+.mem-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:7px 2px;border-top:1px solid var(--line);color:var(--dim)}
+.mem-row b{color:var(--ink)}
+#log{max-height:220px;overflow-y:auto;font-family:var(--mono);font-size:11.5px}
+#log div{padding:7px 4px;border-top:1px solid var(--line);color:var(--dim)}
+#log div b{color:var(--signal);font-weight:600;margin-right:8px}
+.log-bar{display:flex;gap:8px;margin-bottom:6px}
+.log-bar button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 12px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.log-bar button:hover{color:var(--rose);border-color:var(--rose)}
+footer{max-width:1280px;margin:0 auto;padding:6px 20px 30px;font-family:var(--mono);font-size:11px;color:var(--faint);display:flex;gap:12px;flex-wrap:wrap}
+footer .r{margin-left:auto}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="orbit" aria-hidden="true"><div class="ring"></div><div class="core"></div><div class="sat"></div></div>
+  <div class="brand"><h1>ASTRA <span>CONTROL</span></h1><p>personal agent · mission deck · v1</p></div>
+  <div class="status-pill"><span class="dot" id="dot"></span><span id="statusText">Astra · online</span><button id="statusToggle" title="toggle standby">standby</button></div>
+  <span id="clock">--:--</span>
+</header>
+<div class="ticker"><span id="ticker">◈ <b>signal nominal</b> · all systems local-first · chat works offline · data stays in this browser · <b id="tickSubs">0 subscriptions</b> · <b id="tickRec">0 recipes live</b> · recipes run on your words, not on dashboards · ◈</span></div>
+<main>
+  <section class="card" id="panel-chat">
+    <div class="card-h"><h2><i>◉</i>Talk to Astra</h2><span class="right" id="backendTag">local mode</span></div>
+    <div class="card-b">
+      <div id="msgs" role="log" aria-label="chat messages"></div>
+      <div class prévue></div>
+      <div class="chips">
+        <button data-q="What can you do?">What can you do?</button>
+        <button data-q="Summarize my subscriptions">Summarize my subscriptions</button>
+        <button data-q="What recipes are running?">What recipes are running?</button>
+        <button data-q="Clear my activity log">Clear my activity log</button>
+      </div>
+      <div class="chat-row">
+        <input id="chatIn" placeholder="Tell Astra what to do…" autocomplete="off" maxlength="500">
+        <button id="sendBtn">→</button>
+      </div>
+      <p class="hint">Enter to send · stored in localStorage · tries POST /api/chat first, falls back to offline brain.</p>
+    </div>
+  </section>
+  <div id="col-side">
+    <section class="card">
+      <div class="card-h"><h2><i>▣</i>Memory</h2><span class="right" id="memCount"></span></div>
+      <div class="card-b" id="memory"></div>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2><i>⬡</i>Connections</h2><span class="right" id="connCount"></span></div>
+      <div class="card-b">
+        <div class="conn-grid" id="conns"></div>
+        <div class="mini-form">
+          <input id="newConn" placeholder="Add service (e.g. Figma)" maxlength="30">
+          <button id="addConn">Add</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <section class="card" id="panel-conn" style="display:none"></section>
+  <section class="card" id="panel-subs">
+    <div class="card-h"><h2><i>₿</i>Subscriptions</h2><span class="right" id="subCount"></span></div>
+    <div class="card-b">
+      <div class="sub-total"><strong id="subTotal">$0</strong><span>/ month · yearly plans ÷ 12</span></div>
+      <div id="subs"></div>
+      <div class="mini-form">
+        <input id="sName" placeholder="Name" maxlength="30">
+        <input id="sCost" type="number" min="0" step="0.01" placeholder="$" style="max-width:80px">
+        <select id="sCycle"><option value="monthly">monthly</option><option value="yearly">yearly</option></select>
+        <input id="sRenew" type="date">
+        <button id="addSub">Add</button>
+      </div>
+    </div>
+  </section>
+  <section class="card" id="panel-recipes">
+    <div class="card-h"><h2><i>✦</i>Recipes</h2><span class="right">plain words · no code</span></div>
+    <div class="card-b">
+      <div id="recipes"></div>
+      <div class="mini-form">
+        <input id="newRecipe" placeholder="New recipe: Every Friday, …" maxlength="140">
+        <button id="addRecipe">Add</button>
+      </div>
+    </div>
+  </section>
+  <section class="card" id="panel-log">
+    <div class="card-h"><h2><i>☰</i>Activity</h2><span class="right" id="logCount"></span></div>
+    <div class="card-b">
+      <div class="log-bar"><button id="clearLog">clear log</button><button id="exportLog">export json</button></div>
+      <div id="log"></div>
+    </div>
+  </section>
+</main>
+<footer><span>astra-control v1 · single file · no build · localStorage keys: astra_*</span><span class="r">try backend: POST /api/chat {"{message}"}</span></footer>
+<script>
+const $=s=>document.querySelector(s);
+const load=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??f}catch{return f}};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowT=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+/* clock */
+setInterval(()=>{$('#clock').textContent=new Date().toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000);
+/* status */
+let standby=load('astra_standby',false);
+function paintStatus(){$('#statusText').textContent=standby?'Astra · standby':'Astra · online';
+  $('#dot').style.background=standby?'var(--amber)':'var(--signal)';
+  $('#dot').style.boxShadow=`0 0 10px ${standby?'var(--amber)':'var(--signal)'}`;
+  $('#statusToggle').textContent=standby?'wake':'standby';}
+$('#statusToggle').onclick=()=>{standby=!standby;save('astra_standby',standby);paintStatus();log(standby?'Went to standby':'Came online');};
+paintStatus();
+/* activity log */
+let activity=load('astra_activity_v1',[]);
+function log(text){activity.unshift({t:new Date().toISOString(),text});activity=activity.slice(0,200);save('astra_activity_v1',activity);paintLog();}
+function paintLog(){$('#log').innerHTML=activity.length?activity.map(a=>`<div><b>${esc(a.t.slice(5,16).replace('T',' '))}</b>${esc(a.text)}</div>`).join(''):'<div>No activity yet — talk to Astra above.</div>';
+  $('#logCount').textContent=activity.length+' events';}
+$('#clearLog').onclick=()=>{activity=[];save('astra_activity_v1',activity);paintLog();};
+$('#exportLog').onclick=()=>{const b=new Blob([JSON.stringify(activity,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='astra-activity.json';a.click();};
+/* memory (derived stats) */
+function paintMemory(){
+  const c=conns.filter(c=>c.on).length;
+  const r=recipes.filter(r=>r.on).length;
+  const rows=[['mode',standby?'standby':'online'],['chat turns',String(chat.length)],['connections live',c+' / '+conns.length],['recipes live',r+' / '+recipes.length],['monthly burn',monthlyTotal().toFixed(0)+' $'],['storage','localStorage · offline-first']];
+  $('#memory').innerHTML=rows.map(([k,v])=>`<div class="mem-row"><span>${k}</span><b>${esc(v)}</b></div>`).join('');
+  $('#memCount').textContent=c+' live · '+r+' recipes';
+  $('#tickSubs').textContent=subs.length+' subscriptions';
+  $('#tickRec').textContent=r+' recipes live';
+}
+/* chat */
+let chat=load('astra_chat_v1',[{from:'astra',text:'Hey, I\'m Astra. Tell me what to handle — subs, recipes, connections, or just think out loud.',t:nowT()}]);
+function paintChat(){$('#msgs').innerHTML=chat.map(m=>`<div class="msg ${m.from}">${esc(m.text)}<span class="t">${esc(m.t||'')}</span></div>`).join('');
+  $('#msgs').scrollTop=1e6;}
+function push(from,text){chat.push({from,text,t:nowT()});chat=chat.slice(-100);save('astra_chat_v1',chat);paintChat();paintMemory();}
+async function backendReply(message){
+  try{const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),4000);
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message}),signal:ctl.signal});
+    clearTimeout(to);if(!r.ok)throw 0;const j=await r.json();
+    const txt=j.reply||j.message||j.text||JSON.stringify(j);
+    $('#backendTag').textContent='backend live';return String(txt);
+  }catch{$('#backendTag').textContent='local mode';return null;}
+}
+function offlineBrain(q){
+  const s=q.toLowerCase();
+  if(/subscri|spend|burn|cost/.test(s)){const t=monthlyTotal();return t?`You're burning $${t.toFixed(2)}/mo across ${subs.length} subscriptions. Biggest: ${[...subs].sort((a,b)=>monthly(a)-monthly(b)).slice(-1)[0].name}. Want me to flag anything over $20?`:'No subscriptions tracked yet — add one below and I\'ll do the math.';}
+  if(/recipe|automat/.test(s)){const on=recipes.filter(r=>r.on);return on.length?`${on.length} recipes live: ${on.slice(0,3).map(r=>'“'+r.text.slice(0,60)+'…”').join(' · ')}. Toggle the rest in Recipes.`:'All recipes are off. Flip one on and I\'ll start watching.';}
+  if(/connect|gmail|github|notion|calendar/.test(s)){const on=conns.filter(c=>c.on);return on.length?`${on.length} connections live (${on.map(c=>c.name).join(', ')}). Say “connect X” or use the Connections panel.`:'Nothing connected yet — hook up Gmail or GitHub in Connections and I\'ll get to work.';}
+  if(/clear.*log|delete.*activ/.test(s)){activity=[];save('astra_activity_v1',activity);paintLog();return 'Activity log wiped. Fresh slate.';}
+  if(/what can you|help|who are/.test(s))return 'I run your subscriptions, connections, recipes and memory from this deck. Try: “summarize my subscriptions” or “what recipes are running?”';
+  if(/thank|thanks/.test(s))return 'Always. I\'ll keep watch while you do the fun stuff.';
+  if(/standby|sleep/.test(s))return 'Say the word — hit standby in the header and I\'ll go quiet.';
+  return ['Noted — saved to memory. Want me to turn that into a recipe?','On it. I\'ve logged that. Anything else?','Got it. If it should repeat, add it under Recipes in plain words and I\'ll handle the rhythm.'][Math.floor(Math.random()*3)];
+}
+async function send(text){
+  text=(text||$('#chatIn').value).trim();if(!text)return;
+  $('#chatIn').value='';push('user',text);log('chat: '+text.slice(0,80));
+  const d=document.createElement('div');d.className='msg astra typing';d.textContent='Astra is thinking…';$('#msgs').appendChild(d);$('#msgs').scrollTop=1e6;
+  const live=await backendReply(text);
+  d.remove();push('astra',live||offlineBrain(text));log('reply sent');
+}
+$('#sendBtn').onclick=()=>send();
+$('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>send(b.dataset.q));
+/* connections */
+const seedConns=[['Gmail','✉️',1],['Google Calendar','📅',1],['X','𝕏',0],['GitHub','⚙️',1],['Notion','📓',0],['Spotify','🎧',0]];
+let conns=load('astra_conns_v1',seedConns.map(([name,ic,on])=>({name,ic,on:!!on})));
+function paintConns(){$('#conns').innerHTML=conns.map((c,i)=>`<div class="conn ${c.on?'on':''}"><button class="del" data-del="${i}" title="remove">×</button><div class="ic">${esc(c.ic||'🔌')}</div><h3>${esc(c.name)}</h3><p>${c.on?'connected':'not linked'}</p><button data-t="${i}">${c.on?'Disconnect':'Connect'}</button></div>`).join('');
+  $('#connCount').textContent=conns.filter(c=>c.on).length+' / '+conns.length+' live';
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const c=conns[+b.dataset.t];c.on=!c.on;save('astra_conns_v1',conns);paintConns();paintMemory();log((c.on?'Connected ':'Disconnected ')+c.name);});
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const c=conns.splice(+b.dataset.del,1)[0];save('astra_conns_v1',conns);paintConns();paintMemory();log('Removed connection '+c.name);});
+}
+$('#addConn').onclick=()=>{const v=$('#newConn').value.trim();if(!v)return;conns.push({name:v,ic:'🔌',on:false});$('#newConn').value='';save('astra_conns_v1',conns);paintConns();paintMemory();log('Added connection '+v);};
+/* subscriptions */
+let subs=load('astra_subs_v1',[{name:'ChatGPT Plus',cost:20,cycle:'monthly',renew:'2026-10-01'},{name:'iCloud+',cost:2.99,cycle:'monthly',renew:'2026-10-05'},{name:'Spotify',cost:119.88,cycle:'yearly',renew:'2027-02-14'},{name:'GitHub Copilot',cost:10,cycle:'monthly',renew:'2026-10-01'}]);
+const monthly=s=>s.cycle==='yearly'?s.cost/12:s.cost;
+const monthlyTotal=()=>subs.reduce((a,s)=>a+monthly(s),0);
+function paintSubs(){
+  $('#subs').innerHTML=subs.length?subs.map((s,i)=>`<div class="sub-row"><div><div class="n">${esc(s.name)}</div><div class="r">${esc(s.cycle)}${s.renew?' · renews '+esc(s.renew):''}</div></div><span class="c">$${Number(s.cost).toFixed(2)}</span><button class="x" data-x="${i}">×</button></div>`).join(''):'<p style="color:var(--faint);font-size:13px">No subscriptions — add your first above.</p>';
+  $('#subTotal').textContent='$'+monthlyTotal().toFixed(2);
+  $('#subCount').textContent=subs.length+' tracked';
+  document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const s=subs.splice(+b.dataset.x,1)[0];save('astra_subs_v1',subs);paintSubs();paintMemory();log('Removed subscription '+s.name);});
+}
+$('#addSub').onclick=()=>{const name=$('#sName').value.trim(),cost=parseFloat($('#sCost').value);
+  if(!name||!(cost>=0)){$('#sName').focus();return;}
+  subs.push({name,cost,cycle:$('#sCycle').value,renew:$('#sRenew').value||''});
+  $('#sName').value='';$('#sCost').value='';$('#sRenew').value='';
+  save('astra_subs_v1',subs);paintSubs();paintMemory();log('Added subscription '+name+' $'+cost);};
+/* recipes */
+let recipes=load('astra_recipes_v1',[
+  {text:'Every morning at 7am, send me the day ahead: calendar, weather, top 3 priorities.',on:true,meta:'daily · 7:00'},
+  {text:'When an email from my bank arrives, summarize it and nudge me if action is needed.',on:true,meta:'trigger · gmail'},
+  {text:'Every Friday at 5pm, tally the week\'s spending and flag anything weird.',on:false,meta:'weekly · fri 17:00'},
+  {text:'If a GitHub PR mentions me, drop it in chat with a one-line summary.',on:true,meta:'trigger · github'},
+  {text:'On the 1st of each month, list every subscription renewing in the next 30 days.',on:false,meta:'monthly · 1st'}]);
+function paintRecipes(){$('#recipes').innerHTML=recipes.map((r,i)=>`<div class="recipe ${r.on?'':'off'}"><button class="switch" role="switch" aria-checked="${r.on}" data-r="${i}" aria-label="toggle recipe"></button><div class="txt">${esc(r.text)}<div class="meta">${esc(r.meta||'custom')} · <a href="#" data-rm="${i}" style="color:var(--faint)">remove</a></div></div></div>`).join('')||'<p style="color:var(--faint);font-size:13px">No recipes yet.</p>';
+  document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=recipes[+b.dataset.r];r.on=!r.on;save('astra_recipes_v1',recipes);paintRecipes();paintMemory();log((r.on?'Enabled':'Paused')+' recipe: '+r.text.slice(0,60));});
+  document.querySelectorAll('[data-rm]').forEach(a=>a.onclick=e=>{e.preventDefault();const r=recipes.splice(+a.dataset.rm,1)[0];save('astra_recipes_v1',recipes);paintRecipes();paintMemory();log('Deleted recipe: '+r.text.slice(0,60));});
+}
+$('#addRecipe').onclick=()=>{const v=$('#newRecipe').value.trim();if(!v)return;recipes.unshift({text:v,on:true,meta:'custom'});$('#newRecipe').value='';save('astra_recipes_v1',recipes);paintRecipes();paintMemory();log('Added recipe: '+v.slice(0,60));};
+/* boot */
+paintChat();paintConns();paintSubs();paintRecipes();paintLog();paintMemory();
+if(!load('astra_seeded',false)){log('Astra Control v1 initialized');save('astra_seeded',true);}
+</script>
+</body>
+</html>
