@@ -14,9 +14,16 @@ export default function Chat() {
   const [busy, setBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll the message list only — never the window (landing must stay put).
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    const el = bottomRef.current?.parentElement;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
   async function streamReply(fullText: string, id: string) {
